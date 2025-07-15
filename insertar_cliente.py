@@ -16,8 +16,7 @@ def mostrar_ayuda():
     print("\nPresione Enter para continuar...")
     input("\nPresione Enter para continuar...")
 
-def main():
-    # Crear una instancia de Operations
+def menu_cliente():
     ops = Operations()
     while True:
         print("\n=== Sistema de Gestión de Clientes ===")
@@ -33,10 +32,9 @@ def main():
         print("0. Ayuda")
         print("H. Salir")
         opcion = input("\nSeleccione una opción: ")
-        
+
         if opcion == "1":
             try:
-                # Insertar cliente
                 print("\n=== Insertar Cliente ===")
                 cliente = {
                     "nombre": input("Nombre: "),
@@ -47,16 +45,14 @@ def main():
                     "fecha_registro": datetime.now()
                 }
                 ops.validar_cliente(cliente)
-                resultado = ops.insert_product(cliente)
+                resultado = ops.insert_product(cliente, "clientes")
                 print(f"Cliente insertado con ID: {resultado.inserted_id}")
             except ValueError as e:
                 print(f"\nError: {e}")
-        
+
         elif opcion == "2":
-            # Buscar cliente por nombre
             nombre = input("Ingrese el nombre del cliente a buscar: ")
-            clientes = ops.buscar_por_nombre(nombre)
-            # Convertir el cursor a lista para poder contar los resultados
+            clientes = ops.buscar_por_nombre(nombre, "clientes")
             clientes_lista = list(clientes)
             if len(clientes_lista) > 0:
                 print("\n=== Clientes Encontrados ===")
@@ -67,19 +63,18 @@ def main():
                     print(f"Fecha de registro: {c['fecha_registro']}\n")
             else:
                 print("\nNo se encontraron clientes con ese nombre.")
-        
+
         elif opcion == "3":
-            # Actualizar cliente
             nombre = input("Ingrese el nombre del cliente a actualizar: ")
-            clientes = ops.buscar_por_nombre(nombre)
-            if clientes.count() > 0:
-                for c in clientes:
+            clientes = ops.buscar_por_nombre(nombre, "clientes")
+            clientes_lista = list(clientes)
+            if len(clientes_lista) > 0:
+                for c in clientes_lista:
                     print(f"\n=== Cliente Encontrado ===")
                     print(f"ID: {c['_id']}")
                     print(f"Nombre: {c['nombre']} {c['apellidos']}")
                     print(f"Dirección: {c['calle']} {c['numero']}, {c['ciudad']}")
                     print(f"Fecha de registro: {c['fecha_registro']}")
-                
                 id_cliente = input("\nIngrese el ID del cliente a actualizar: ")
                 try:
                     actualizar = {
@@ -90,18 +85,17 @@ def main():
                         "ciudad": input("Nueva ciudad: ")
                     }
                     ops.validar_cliente(actualizar)
-                    resultado = ops.update_product({"_id": id_cliente}, {"$set": actualizar})
+                    resultado = ops.update_product({"_id": id_cliente}, {"$set": actualizar}, "clientes")
                     print(f"Clientes actualizados: {resultado.modified_count}")
                 except ValueError as e:
                     print(f"\nError: {e}")
             else:
                 print("\nNo se encontraron clientes con ese nombre.")
-        
+
         elif opcion == "4":
             nombre = input("Ingrese el nombre del cliente a eliminar: ")
-            clientes = ops.buscar_por_nombre(nombre)
+            clientes = ops.buscar_por_nombre(nombre, "clientes")
             clientes_lista = list(clientes)
-            
             if len(clientes_lista) > 0:
                 print("\n=== Clientes Encontrados ===")
                 for i, c in enumerate(clientes_lista, 1):
@@ -109,11 +103,10 @@ def main():
                     print(f"Nombre: {c['nombre']} {c['apellidos']}")
                     print(f"Dirección: {c['calle']} {c['numero']}, {c['ciudad']}")
                     print(f"Fecha de registro: {c['fecha_registro']}")
-                
                 if len(clientes_lista) == 1:
                     confirmacion = input(f"\n¿Está seguro de eliminar a {clientes_lista[0]['nombre']} {clientes_lista[0]['apellidos']}? (s/n): ")
                     if confirmacion.lower() == 's':
-                        resultado = ops.delete_product({"nombre": clientes_lista[0]['nombre']})
+                        resultado = ops.delete_product({"nombre": clientes_lista[0]['nombre']}, "clientes")
                         print(f"Cliente eliminado: {resultado.deleted_count}")
                 else:
                     try:
@@ -121,7 +114,7 @@ def main():
                         if 1 <= num_cliente <= len(clientes_lista):
                             confirmacion = input(f"\n¿Está seguro de eliminar a {clientes_lista[num_cliente-1]['nombre']} {clientes_lista[num_cliente-1]['apellidos']}? (s/n): ")
                             if confirmacion.lower() == 's':
-                                resultado = ops.delete_product({"nombre": clientes_lista[num_cliente-1]['nombre']})
+                                resultado = ops.delete_product({"nombre": clientes_lista[num_cliente-1]['nombre']}, "clientes")
                                 print(f"Cliente eliminado: {resultado.deleted_count}")
                         else:
                             print("\nNúmero de cliente inválido")
@@ -130,37 +123,31 @@ def main():
             else:
                 print("\nNo se encontraron clientes con ese nombre.")
 
-                print("\nNo se encontraron clientes con ese nombre.")
-        
         elif opcion == "5":
-            # Buscar por ciudad
             ciudad = input("Ingrese la ciudad a buscar: ")
-            clientes = ops.buscar_por_ciudad(ciudad)
+            clientes = ops.buscar_por_ciudad(ciudad, "clientes")
             print(f"\n=== Clientes en {ciudad} ===")
             for c in clientes:
                 print(f"- {c['nombre']} {c['apellidos']}")
-        
+
         elif opcion == "6":
-            # Buscar por fecha
             try:
                 fecha = input("Ingrese la fecha de registro (YYYY-MM-DD): ")
                 ops.validar_fecha(fecha)
-                clientes = ops.buscar_por_fecha_registro(fecha)
+                clientes = ops.buscar_por_fecha_registro(fecha, "clientes")
                 print(f"\n=== Clientes del {fecha} ===")
                 for c in clientes:
                     print(f"- {c['nombre']} {c['apellidos']}")
             except ValueError as e:
                 print(f"\nError: {e}")
-        
+
         elif opcion == "7":
-            # Ver todos los clientes
-            clientes = ops.find_products()
+            clientes = ops.find_products(None, "clientes")
             print("\n=== Lista de Clientes ===")
             for c in clientes:
                 print(f"- {c['nombre']} {c['apellidos']} ({c['ciudad']})")
-        
+
         elif opcion == "8":
-            # Buscar avanzado
             print("\n=== Búsqueda Avanzada ===")
             criterios = {}
             ciudad = input("Ciudad (Enter para saltar): ")
@@ -186,21 +173,20 @@ def main():
                     print("Fecha fin inválida, omitiendo...")
                     fecha_fin = ""
             if criterios:
-                clientes = ops.buscar_multiple_criterios(criterios)
+                clientes = ops.buscar_multiple_criterios(criterios, "clientes")
                 print("\n=== Resultados de la Búsqueda ===")
                 for c in clientes:
                     print(f"- {c['nombre']} {c['apellidos']} ({c['ciudad']})")
             else:
                 print("No se especificaron criterios de búsqueda")
-        
+
         elif opcion == "9":
-            # Ordenar clientes
             print("\n=== Ordenar Clientes ===")
             print("1. Por nombre")
             print("2. Por ciudad")
             print("3. Por fecha de registro")
             orden_opcion = input("Seleccione una opción: ")
-            orden = 1 # ascendente
+            orden = 1
             campo = ""
             if orden_opcion == "1":
                 campo = "nombre"
@@ -214,23 +200,22 @@ def main():
             ordenar_por = input("Orden ascendente (A) o descendente (D)? ").upper()
             if ordenar_por == 'D':
                 orden = -1
-            clientes = ops.ordenar_clientes(campo, orden)
+            clientes = ops.ordenar_clientes(campo, orden, "clientes")
             print(f"\n=== Clientes Ordenados por {campo} ===")
             for c in clientes:
                 print(f"- {c['nombre']} {c['apellidos']} ({c['ciudad']})")
-        
+
         elif opcion == "0":
-            # Ayuda
             mostrar_ayuda()
-        
-        elif opcion == "H":
-            # Salir
-            print("¡Hasta luego!")
+
+        elif opcion.upper() == "H":
+            print("Saliendo del sistema de clientes...")
             ops.db.close()
             break
+
         else:
             print("Opción no válida. Intente nuevamente.")
         input("\nPresione Enter para continuar...")
 
 if __name__ == "__main__":
-    main()
+    menu_cliente()
